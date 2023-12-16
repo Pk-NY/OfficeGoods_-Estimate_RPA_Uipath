@@ -1,39 +1,44 @@
-### Documentation is included in the Documentation folder ###
+### [견적서 메일 발송] ###
+
+메일로 수신한 작업지시서를 읽어서 사무용품 사이트에서 물품의 견적서를 작성하여 요청자에게 메일 발송
 
 
-### REFrameWork Template ###
-**Robotic Enterprise Framework**
 
-* Built on top of *Transactional Business Process* template
-* Uses *State Machine* layout for the phases of automation project
-* Offers high level logging, exception handling and recovery
-* Keeps external settings in *Config.xlsx* file and Orchestrator assets
-* Pulls credentials from Orchestrator assets and *Windows Credential Manager*
-* Gets transaction data from Orchestrator queue and updates back status
-* Takes screenshots in case of system exceptions
+**[사전작업]**
+
+Config.xlsx : input과 output 폴더 경로, 사이트URL, 메일계정, 메일제목, 메일내용, 결과파일 이름
 
 
-### How It Works ###
+**[개인작업파일 mywork 폴더]**
+
+   GetAttachmentFile 수신한 메일에 첨부된 작업지시서를 다운
+  
+   ReadExcel_DataTable : 작업지시서를 읽고 DT생성 (물품코드, 수량)
+
+   CheckOutputFolder : output폴더확인후생성
+
+   GetPdf - 장바구니 페이지에서 견적서를 클릭하여 PDF 파일로 생성후 저장
+   
+   SendEmail - 저장한 PDF 파일을 확인, 첨부하여 메일 발송
+   
+   
+
+### [작업과정] ###
 
 1. **INITIALIZE PROCESS**
- + ./Framework/*InitiAllSettings* - Load configuration data from Config.xlsx file and from assets
- + ./Framework/*GetAppCredential* - Retrieve credentials from Orchestrator assets or local Windows Credential Manager
- + ./Framework/*InitiAllApplications* - Open and login to applications used throughout the process
-
+   
+   수신한 메일에 첨부된 작업지시서를 input폴더에 다운받고 읽어서 DT 생성 -> Transactiondata 물품코드, 수량
+   
 2. **GET TRANSACTION DATA**
- + ./Framework/*GetTransactionData* - Fetches transactions from an Orchestrator queue defined by Config("OrchestratorQueueName") or any other configured data source
 
+    Transaction Item의 타입 Datarow. Transactiondata의 물품코드, 수량
+   
 3. **PROCESS TRANSACTION**
- + *Process* - Process trasaction and invoke other workflows related to the process being automated 
- + ./Framework/*SetTransactionStatus* - Updates the status of the processed transaction (Orchestrator transactions by default): Success, Business Rule Exception or System Exception
 
+   사무용품 사이트에서 작업지시서의 물품코드를 검색하여 나온 물품의 수량을 작업지시서 대로 입력하여 장바구니에 담기
+
+    
 4. **END PROCESS**
- + ./Framework/*CloseAllApplications* - Logs out and closes applications used throughout the process
-
-
-### For New Project ###
-
-1. Check the Config.xlsx file and add/customize any required fields and values
-2. Implement InitiAllApplications.xaml and CloseAllApplicatoins.xaml workflows, linking them in the Config.xlsx fields
-3. Implement GetTransactionData.xaml and SetTransactionStatus.xaml according to the transaction type being used (Orchestrator queues by default)
-4. Implement Process.xaml workflow and invoke other workflows related to the process being automated
+   
+   장바구니 페이지에서 견적서를 클릭하여 PDF 파일로 생성후 저장하여 메일에 첨부하여 발송
+   
